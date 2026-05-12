@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IUE — Graduate Flow</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Inter',sans-serif;
+  background:#f5f0e8;
+  color:#1a1a1a;
+  min-height:100vh;
+}
+.glass {
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,0.08);
+}
+.swiss-border {
+  border-left:4px solid #f37021;
+  padding-left:1rem;
+}
+.glow {
+  position:fixed;
+  width:500px; height:500px;
+  background:#f37021;
+  border-radius:9999px;
+  filter:blur(180px);
+  opacity:.10;
+  pointer-events:none;
+}
+#tip {
+  position:fixed;
+  background:rgba(26,26,26,0.98);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:8px;
+  font-size:12px;
+  pointer-events:none;
+  display:none;
+  z-index:9999;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+  font-family:sans-serif;
+  line-height:1.4;
+}
+</style>
+</head>
+<body>
+
+<div class="glow" style="top:-100px;left:-100px;"></div>
+<div class="glow" style="bottom:-200px;right:-100px;"></div>
+
+<div class="max-w-7xl mx-auto px-6 md:px-20 py-20">
+
+  <div class="swiss-border mb-16">
+    <span class="text-orange-500 uppercase tracking-[0.4em] text-xs font-bold block mb-3">
+      İzmir University of Economics
+    </span>
+    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tight">
+      Graduate Flow
+    </h1>
+    <p class="text-zinc-500 mt-4 max-w-xl leading-relaxed">
+      Sankey diagram showing the distribution of graduates from each academic year into departments. Hover over a ribbon to explore.
+    </p>
+  </div>
+
+  <div class="glass rounded-[2rem] p-8" style="position:relative;">
+    <h3 class="uppercase tracking-[0.3em] text-xs font-bold text-zinc-500 mb-8">
+      Year → Department Flow
+    </h3>
+    <div id="wrap-sk" style="position:relative; width:100%;">
+      <canvas id="sk" style="cursor:crosshair;"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<div id="tip"></div>
+
+<script>
+const rawFlow = {
+  2017:{Arch:66,FD:15,ID:31,IAED:54,VCD:15},
+  2018:{Arch:83,FD:13,ID:20,IAED:44,VCD:12},
+  2019:{Arch:77,FD:10,ID:15,IAED:54,VCD:14},
+  2020:{Arch:88,FD:15,ID:24,IAED:73,VCD:16},
+  2021:{Arch:63,FD:17,ID:27,IAED:46,VCD:18},
+  2022:{Arch:49,FD:6, ID:15,IAED:50,VCD:12},
+  2023:{Arch:47,FD:15,ID:29,IAED:47,VCD:19},
+  2024:{Arch:41,FD:16,ID:32,IAED:56,VCD:8 },
+  2025:{Arch:35,FD:12,ID:46,IAED:52,VCD:18},
+};
+
+const skDepts = [
+  { key:'Arch', label:'Architecture',         color:'#66438b' },
+  { key:'IAED', label:'Interior Arch.',        color:'#57ba47' },
+  { key:'ID',   label:'Industrial Design',     color:'#f4d911' },
+  { key:'VCD',  label:'Visual Communication',  color:'#f37235' },
+  { key:'FD',   label:'Fashion Design',        color:'#d1428e' }
+];
+
+const skYears = Object.keys(rawFlow).map(Number).sort((a,b)=>a-b);
+const skYearTotals = {};
+skYears.forEach(y=>{ skYearTotals[y]=skDepts.reduce((s,d)=>s+rawFlow[y][d.key],0); });
+const skDeptTotals = {};
+skDepts.forEach(d=>{ skDeptTotals[d.label]=skYears.reduce((s,y)=>s+rawFlow[y][d.key],0); });
+
+const skCanvas = document.getElementById('sk');
+const skTip = document.getElementById('tip');
+const DPR = window.devicePixelRatio||1;
+const PAD_TOP=20, PAD_BTM=20, PAD_BAND=14, BAR_W=18;
+
+function getSkLayout(){
+  const cssW = skCanvas.parentElement.clientWidth;
+  const H = 500;
+  const lx=60, rx=cssW-220;
+  const totalAll = skYears.reduce((s,y)=>s+skYearTotals[y],0);
+  let yOff=PAD_TOP;
+  const yearPos={};
+  skYears.forEach(y=>{
+    const h=(skYearTotals[y]/totalAll)*(H-PAD_TOP-PAD_BTM-PAD_BAND*(skYears.length-1));
+    yearPos[y]={y:yOff,h}; yOff+=h+PAD_BAND;
+  });
+  let dOff=PAD_TOP;
+  const deptPos={};
+  skDepts.forEach(d=>{
+    const h=(skDeptTotals[d.label]/totalAll)*(H-PAD_TOP-PAD_BTM-PAD_BAND*(skDepts.length-1));
+    deptPos[d.label]={y:dOff,h}; dOff+=h+PAD_BAND;
+  });
+  return{cssW,H,lx,rx,yearPos,deptPos};
+}
+
+function buildRibbons(layout){
+  const ribbons=[];
+  const yearFill={}; skYears.forEach(y=>yearFill[y]=0);
+  const deptFill={}; skDepts.forEach(d=>deptFill[d.label]=0);
+  skYears.forEach(y=>{
+    const scale=layout.yearPos[y].h/skYearTotals[y];
+    skDepts.forEach(d=>{
+      const val=rawFlow[y][d.key];
+      if(val<=0)return;
+      const fhY=val*scale;
+      const fhD=val*(layout.deptPos[d.label].h/skDeptTotals[d.label]);
+      ribbons.push({year:y,dept:d.label,val,color:d.color,
+        y1s:layout.yearPos[y].y+yearFill[y],fhY,
+        y2s:layout.deptPos[d.label].y+deptFill[d.label],fhD});
+      yearFill[y]+=fhY;
+      deptFill[d.label]+=fhD;
+    });
+  });
+  return ribbons;
+}
+
+let skLayout, skRibbons, skCtx;
+
+function initSankey(){
+  skLayout=getSkLayout();
+  skCanvas.style.width=skLayout.cssW+'px';
+  skCanvas.style.height=skLayout.H+'px';
+  skCanvas.width=Math.round(skLayout.cssW*DPR);
+  skCanvas.height=Math.round(skLayout.H*DPR);
+  skCtx=skCanvas.getContext('2d');
+  skCtx.scale(DPR,DPR);
+  skRibbons=buildRibbons(skLayout);
+  drawSankey(null);
+}
+
+function drawSankey(hit){
+  skCtx.clearRect(0,0,skLayout.cssW,skLayout.H);
+  const cp=(skLayout.rx-(skLayout.lx+BAR_W))*0.45;
+  skRibbons.forEach(r=>{
+    const isHit=hit===r;
+    const alpha=hit?(isHit?'ee':'12'):'90';
+    skCtx.beginPath();
+    skCtx.moveTo(skLayout.lx+BAR_W,r.y1s);
+    skCtx.bezierCurveTo(skLayout.lx+BAR_W+cp,r.y1s,skLayout.rx-cp,r.y2s,skLayout.rx,r.y2s);
+    skCtx.lineTo(skLayout.rx,r.y2s+r.fhD);
+    skCtx.bezierCurveTo(skLayout.rx-cp,r.y2s+r.fhD,skLayout.lx+BAR_W+cp,r.y1s+r.fhY,skLayout.lx+BAR_W,r.y1s+r.fhY);
+    skCtx.fillStyle=r.color+alpha;
+    skCtx.fill();
+  });
+  skYears.forEach(y=>{
+    const p=skLayout.yearPos[y];
+    skCtx.fillStyle='#1a1a1a';
+    skCtx.fillRect(skLayout.lx,p.y,BAR_W,p.h);
+    skCtx.textAlign='right';
+    skCtx.font='600 11px sans-serif';
+    skCtx.fillStyle='#1a1a1a';
+    skCtx.fillText(y,skLayout.lx-8,p.y+p.h/2+4);
+  });
+  skDepts.forEach(d=>{
+    const p=skLayout.deptPos[d.label];
+    skCtx.fillStyle=d.color;
+    skCtx.fillRect(skLayout.rx,p.y,BAR_W,p.h);
+    skCtx.textAlign='left';
+    skCtx.fillStyle='#1a1a1a';
+    skCtx.font='500 11px sans-serif';
+    skCtx.fillText(d.label,skLayout.rx+BAR_W+8,p.y+p.h/2+4);
+  });
+}
+
+skCanvas.addEventListener('mousemove',e=>{
+  const rect=skCanvas.getBoundingClientRect();
+  const mx=(e.clientX-rect.left)*(skLayout.cssW/rect.width);
+  const my=(e.clientY-rect.top)*(skLayout.H/rect.height);
+  const getBezierY=(y1,y2,t)=>{const mt=1-t;return mt*mt*mt*y1+3*mt*mt*t*y1+3*mt*t*t*y2+t*t*t*y2;};
+  let currentHit=skRibbons.find(r=>{
+    if(mx<skLayout.lx+BAR_W||mx>skLayout.rx)return false;
+    const t=(mx-(skLayout.lx+BAR_W))/(skLayout.rx-(skLayout.lx+BAR_W));
+    return my>=getBezierY(r.y1s,r.y2s,t)&&my<=getBezierY(r.y1s+r.fhY,r.y2s+r.fhD,t);
+  });
+  if(currentHit){
+    const pct=((currentHit.val/skYearTotals[currentHit.year])*100).toFixed(1);
+    skTip.style.display='block';
+    skTip.style.left=e.clientX+15+'px';
+    skTip.style.top=e.clientY+15+'px';
+    skTip.innerHTML=`<strong>${currentHit.year}</strong><br>${currentHit.dept}: <b>${currentHit.val}</b> (${pct}%)`;
+  } else { skTip.style.display='none'; }
+  drawSankey(currentHit);
+});
+
+skCanvas.addEventListener('mouseleave',()=>{
+  skTip.style.display='none';
+  drawSankey(null);
+});
+
+window.addEventListener('resize',initSankey);
+initSankey();
+</script>
+
+</body>
+</html>
