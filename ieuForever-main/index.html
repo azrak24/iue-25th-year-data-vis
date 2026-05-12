@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap"
+    rel="stylesheet">
+  <title>IEU Academic Staff — Flower Spiral</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <header class="main-header">
+    <h1>ACADEMIC STAFF NUMBERS OF <br>IZMIR UNIVERSITY OF ECONOMICS</h1>
+    <h2>2001<br>2025</h2>
+  </header>
+
+  <div class="panel-container">
+    <div class="panel panel-wide">
+      <span class="panel-label">DESCRIPTION</span>
+      <p>
+        This graph shows the increase in the number of academicians at Izmir University of Economics
+        from its founding year to 2026, categorized by five different academician types.
+      </p>
+    </div>
+
+    <div class="panel panel-source">
+      <span class="panel-label">SOURCE</span>
+      <a href="https://istatistik.yok.gov.tr/" target="_blank">Yükseköğretim Bilgi Yönetim Sistemi</a>
+    </div>
+
+    <div class="panel panel-tools">
+      <span class="panel-label">TOOLS</span>
+      <p>HTML, CSS, JavaScript, d3.js, Adobe Illustrator</p>
+    </div>
+
+    <div class="panel panel-student">
+      <span class="panel-label">STUDENT NAME</span>
+      <p>
+        Oğuz Ülgen Tunç<br>
+        <i>Visual Communication Design (4th year)</i>
+      </p>
+    </div>
+
+    <button class="panel" id="export-btn" title="Save as SVG">
+      <svg width="24" height="24" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+      <span>EXPORT SVG</span>
+    </button>
+  </div>
+
+  <div class="viz-container">
+
+    <div id="legend"></div>
+
+    <div id="canvas-wrap">
+      <svg id="main-svg" xmlns="http://www.w3.org/2000/svg"
+        aria-label="Spiral flower chart of IEU total academic staff by rank from 2001 to 2025."
+        style="width: 910px; height: 910px;">
+        <title>IEU Academic Staff Flower Spiral 2001–2025</title>
+      </svg>
+    </div>
+
+  </div>
+
+  <div id="tooltip"></div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

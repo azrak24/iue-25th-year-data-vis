@@ -1,0 +1,354 @@
+/* ── RESET & BASE ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #F4EEDB;
+  --ink: #353535;
+  --ink-light: #878786;
+  --rule: #F4EEDB;
+  --header-color: #A4185C;
+  --header-color-two: #68D0B0;
+
+  --col-prof-m: #1a1714;
+  --col-prof-f: #e6b84a;
+  --col-assoc-m: #1e3d2a;
+  --col-assoc-f: #72c28a;
+  --col-doc-m: #6e1818;
+  --col-doc-f: #e07878;
+  --col-lec-m: #112644;
+  --col-lec-f: #6aafd4;
+  --col-res-m: #35104e;
+  --col-res-f: #b882e0;
+
+  --ff: 'Source Sans 3', sans-serif;
+  --ff-headers: 'Jost', sans-serif;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: var(--ff);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* ── 1. ANA BAŞLIK DİKDÖRTGENİ ── */
+.main-header {
+  background-color: transparent;
+  border: none;
+  /* Önceki tüm kenarlıkları siliyoruz */
+  border-bottom: 2px solid var(--header-color);
+  /* Başlığın altındaki yatay çizgi */
+  margin: 0;
+  /* Sayfa kenarındaki boşluklar kalktı */
+  width: 100%;
+  /* Sayfanın tamamını kaplasın */
+  padding: 15px 20px;
+  /* Yazıların kenara yapışmaması için iç boşluk */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 120px;
+}
+
+.main-header h1 {
+  font-family: var(--ff-headers);
+  font-weight: 600;
+  font-size: 48px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--header-color);
+  /* Açık renk arka planda okunması için yazıyı bordo yaptık */
+  margin: 0;
+}
+
+.main-header h2 {
+  font-family: var(--ff-headers);
+  font-weight: 200;
+  font-size: 48px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-align: right;
+  color: var(--header-color);
+  /* Yazıyı bordo yaptık */
+  margin: 0;
+}
+
+/* ── 2. 6'LI BİLGİ PANELLERİ (GRID) ── */
+.panel-container {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  /* KUTULAR ARASI BOŞLUK SIFIRLANDI */
+  margin: 0;
+  /* Sayfa kenarı boşlukları sıfırlandı */
+  width: 100%;
+  border-bottom: 2px solid var(--header-color);
+  /* Grafikle panelleri ayıran yatay çizgi */
+}
+
+.panel {
+  background-color: transparent;
+  border: none;
+  /* Dört tarafı saran çerçeveyi kaldırdık */
+  border-right: 2px solid var(--header-color);
+  /* Panelleri ayıran dikey çizgiler */
+  height: 100px;
+  padding: 5px 20px;
+  /* Yazıların çizgilere değmemesi için iç boşluk (padding) */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+}
+
+.panel p {
+  font-family: var(--ff);
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--ink);
+  /* Okunabilirlik için açıklama metinlerini koyu renk yaptık */
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  text-align: left;
+  margin: 0;
+}
+
+.panel-wide {
+  grid-column: span 2;
+  justify-content: space-between;
+  /* İçindeki elemanları üst ve alt köşelere iter */
+}
+
+.panel-wide p {
+  max-width: 100%;
+  /* Metnin kutunun tamamına yayılabilmesi için */
+}
+
+.panel-label {
+  font-family: var(--ff);
+  font-size: 16px;
+  font-weight: 600;
+  /* Çizgili tasarımda daha net durması için biraz kalınlaştırdık */
+  color: var(--header-color);
+  /* Etiketler (DESCRIPTION, SOURCE vs.) bordo oldu */
+}
+
+.panel-wide,
+.panel-source,
+.panel-tools,
+.panel-student {
+  justify-content: space-between;
+}
+
+.panel a {
+  font-family: var(--ff);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--header-color);
+  /* Link rengi bordo oldu */
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.panel a:hover {
+  opacity: 0.6;
+  border-bottom-color: var(--bg);
+  /* Üzerine gelince alt çizgi belirginleşir */
+}
+
+.panel-student p i {
+  font-size: 12px;
+  /* Bölüm ismini isimden biraz daha küçük yaparak hiyerarşi sağlıyoruz */
+  font-style: italic;
+}
+
+.panel:last-child {
+  border-right: none;
+}
+
+/* ── EXPORT PANEL BUTTON (TÜM PANEL BİR BUTON) ── */
+button.panel#export-btn {
+  cursor: pointer;
+  align-items: center;
+  /* İkon ve yazıyı yatayda ortalar */
+  justify-content: center;
+  /* Dikeyde tam merkeze alır */
+  gap: 10px;
+  /* İkon ve yazı arasındaki boşluk */
+  color: var(--header-color);
+  font-family: var(--ff);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  outline: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Üzerine gelindiğinde (Hover Efekti) */
+button.panel#export-btn:hover {
+  background-color: var(--header-color);
+  /* İçi bordo dolar */
+  color: var(--bg);
+  /* İkon ve yazı krem rengine döner */
+}
+
+/* ── VIZ CONTAINER (YENİ MİZANPAJ) ── */
+.viz-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  /* İçerikleri dikeyde hizalar */
+  justify-content: space-between;
+  padding-right: 40px;
+  /* Grafiğin sağ kenardan bırakacağı boşluk */
+}
+
+/* ── LEGEND BAR (SOLDA DİKEY) ── */
+#legend {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 40px;
+  border-bottom: none;
+  border-right: none;
+  font-size: 13px;
+  /* 9px'ten 13px'e çıkarıldı */
+  letter-spacing: 0.07em;
+  font-weight: 400;
+  color: var(--ink-light);
+  min-height: 500px;
+  justify-content: center;
+}
+
+.leg-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.leg-rank {
+  font-weight: 800;
+  font-size: 14px;
+  /* 9px'ten 14px'e çıkarıldı */
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+
+/* ── YENİ İKONLU LEJANT NOTLARI ── */
+.leg-note-wrapper {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  /* İki açıklama arasındaki boşluk */
+  color: var(--ink);
+  /* Açıklamaların rengi */
+}
+
+.leg-note-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* İkon ile yazı arasındaki boşluk */
+  font-size: 16px;
+  font-style: italic;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+/* ── CANVAS (SAĞA YASLI GRAFİK) ── */
+#canvas-wrap {
+  display: flex;
+  justify-content: flex-end;
+  /* Grafiği sağa yaslar */
+  align-items: center;
+  padding: 0;
+  flex-grow: 1;
+  overflow: visible;
+  /* Büyüdüğünde kesilmesini önler */
+}
+
+#main-svg {
+  display: block;
+  /* JavaScript'teki ve HTML'deki değerleri ezip geçmek için !important kullanıyoruz */
+  /* Orijinal boyut 910px'di. %35 büyütülmüş hali için 1250px yapıyoruz. */
+  width: 1150px !important;
+  height: 1150px !important;
+  max-width: none !important;
+  /* Ekran sınırlarına takılmasını engeller */
+  overflow: visible !important;
+}
+
+/* ── TOOLTIP ── */
+#tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--ff);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  padding: 10px 14px;
+  line-height: 1.7;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 999;
+  max-width: 200px;
+}
+
+#tooltip.visible {
+  opacity: 1;
+}
+
+#tooltip strong {
+  font-weight: 800;
+  font-size: 11px;
+  display: block;
+  margin-bottom: 4px;
+  letter-spacing: 0.08em;
+}
+
+#tooltip .tt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+#tooltip .tt-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 0.5px solid var(--rule);
+  padding: 16px 52px;
+  font-size: 9px;
+  font-weight: 300;
+  color: var(--ink-light);
+  letter-spacing: 0.06em;
+  display: flex;
+  justify-content: space-between;
+}
